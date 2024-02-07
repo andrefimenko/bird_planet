@@ -93,15 +93,25 @@ class BirdPlanet:
     def _create_star_sky(self):
 
         star = Star(self)
-        self.stars.add(star)
+        star_quantity = (self.screen.get_rect().width *
+            self.screen.get_rect().height) // 10000
+        # print(star_quantity)
+        current_quantity = 0
+        while current_quantity < star_quantity:
+            new_star = Star(self)
+            self.stars.add(new_star)
+            current_quantity += 1
 
     def _update_screen(self):
 
         self.screen.fill(self.settings.bg_color)
+        self.stars.draw(self.screen)
+
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
+
         self.ship.blitme()
-        self.stars.draw(self.screen)
+
 
         pygame.display.flip()
 
