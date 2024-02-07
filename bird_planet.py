@@ -6,6 +6,7 @@ import pygame
 from settings import Settings
 from ship import Ship
 from bullet import Bullet
+from star import Star
 
 class BirdPlanet:
 
@@ -22,6 +23,9 @@ class BirdPlanet:
 
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
+        self.stars = pygame.sprite.Group()
+
+        self._create_star_sky()
 
         # self.start_time = time.time()
         self.last_shot_time = 0
@@ -86,12 +90,18 @@ class BirdPlanet:
                 self.bullets.remove(bullet)
         # print(len(self.bullets))
 
+    def _create_star_sky(self):
+
+        star = Star(self)
+        self.stars.add(star)
+
     def _update_screen(self):
 
         self.screen.fill(self.settings.bg_color)
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
         self.ship.blitme()
+        self.stars.draw(self.screen)
 
         pygame.display.flip()
 
