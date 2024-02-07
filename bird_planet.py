@@ -23,7 +23,7 @@ class BirdPlanet:
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
 
-        self.start_time = time.time()
+        # self.start_time = time.time()
         self.last_shot_time = 0
 
     def run_game(self):

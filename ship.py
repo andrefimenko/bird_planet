@@ -8,7 +8,7 @@ class Ship:
         self.settings = bp_game.settings
         self.screen_rect = bp_game.screen.get_rect()
 
-        self.image = pygame.image.load('images/ship.bmp')
+        self.image = pygame.image.load('images/ship2.bmp')
         self.rect = self.image.get_rect()
 
         self.rect.midleft = self.screen_rect.midleft
