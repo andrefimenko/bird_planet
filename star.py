@@ -9,6 +9,7 @@ class Star(Sprite):
 
         super().__init__()
         self.screen = bp_game.screen
+        self.settings = bp_game.settings
 
         self.image = pygame.image.load('images/1453737154.bmp')
         self.rect = self.image.get_rect()
@@ -19,4 +20,10 @@ class Star(Sprite):
         # print(bp_game.screen.get_rect().width)
 
         self.x = float(self.rect.x)
-        self.y = float(self.rect.y)
+
+    def update(self):
+
+        self.x -= self.settings.star_speed
+        self.rect.x = self.x
+
+

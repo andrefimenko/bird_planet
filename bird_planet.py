@@ -25,6 +25,9 @@ class BirdPlanet:
         self.bullets = pygame.sprite.Group()
         self.stars = pygame.sprite.Group()
 
+        self.star_quantity = (self.screen.get_rect().width *
+                         self.screen.get_rect().height) // 10000
+        self.current_star_quantity = 0
         self._create_star_sky()
 
         # self.start_time = time.time()
@@ -33,6 +36,7 @@ class BirdPlanet:
     def run_game(self):
 
         while True:
+            self._update_stars()
             self._check_events()
             self.ship.update()
             self._update_bullets()
@@ -90,17 +94,37 @@ class BirdPlanet:
                 self.bullets.remove(bullet)
         # print(len(self.bullets))
 
+    def _update_stars(self):
+
+        if self.star_quantity > self.current_star_quantity:
+            self._refill_star_sky()
+
+        self.stars.update()
+
+        for star in self.stars.copy():
+            if star.rect.right <= 0: # self.screen.get_rect().right:
+                self.stars.remove(star)
+                self.current_star_quantity -= 1
+
     def _create_star_sky(self):
 
-        star = Star(self)
-        star_quantity = (self.screen.get_rect().width *
-            self.screen.get_rect().height) // 10000
-        # print(star_quantity)
-        current_quantity = 0
-        while current_quantity < star_quantity:
+        while self.current_star_quantity < self.star_quantity:
             new_star = Star(self)
             self.stars.add(new_star)
-            current_quantity += 1
+            self.current_star_quantity += 1
+
+    def _refill_star_sky(self):
+
+        while self.current_star_quantity < self.star_quantity:
+            new_star = Star(self)
+            new_star.x = self.screen.get_rect().width
+            self.stars.add(new_star)
+            self.current_star_quantity += 1
+            print(self.current_star_quantity)
+
+    # def _star_rebirth(self):
+    #
+    #     if self.star_quantity
 
     def _update_screen(self):
 

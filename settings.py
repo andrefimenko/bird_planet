@@ -5,6 +5,9 @@ class Settings:
         # Screen settings
         self.bg_color = (0, 0, 0)
 
+        # Star settings
+        self.star_speed = 0.8
+
         # Ship settings
         self.ship_vert_speed = 1.5
         self.ship_hor_speed = 3
@@ -15,3 +18,6 @@ class Settings:
         self.bullet_height = 3
         self.bullet_color = "white"
         self.gun_fire_rate = 1
+
+        # Bird settings
+        self.bird_speed = 1
