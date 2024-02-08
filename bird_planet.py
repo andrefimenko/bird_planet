@@ -120,7 +120,7 @@ class BirdPlanet:
             new_star.x = self.screen.get_rect().width
             self.stars.add(new_star)
             self.current_star_quantity += 1
-            print(self.current_star_quantity)
+            # print(self.current_star_quantity)
 
     # def _star_rebirth(self):
     #
