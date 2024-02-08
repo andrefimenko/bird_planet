@@ -1,5 +1,6 @@
 import sys
 import time
+from random import randint
 
 import pygame
 
@@ -7,6 +8,9 @@ from settings import Settings
 from ship import Ship
 from bullet import Bullet
 from star import Star
+from rock import Rock
+from scenario import Scenario
+
 
 class BirdPlanet:
 
@@ -14,6 +18,7 @@ class BirdPlanet:
 
         pygame.init()
         self.clock = pygame.time.Clock()
+        self.current_time = time.time()
         self.settings = Settings()
 
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
@@ -21,22 +26,30 @@ class BirdPlanet:
         self.settings.screen_height = self.screen.get_rect().height
         pygame.display.set_caption("Bird Planet")
 
+        self.scenario = Scenario(self)
+        # self.stage = self.scenario.stage
+
+        self.current_ground_level = self.settings.screen_height - 100
+
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
         self.stars = pygame.sprite.Group()
+        self.rocks = pygame.sprite.Group()
 
         self.star_quantity = (self.screen.get_rect().width *
                          self.screen.get_rect().height) // 10000
         self.current_star_quantity = 0
         self._create_star_sky()
 
-        # self.start_time = time.time()
+        # self.current_time = current_time.current_time()
         self.last_shot_time = 0
 
     def run_game(self):
 
         while True:
+            self.scenario.stages(self.current_time)
             self._update_stars()
+            self._update_rocks(self.scenario.stage)
             self._check_events()
             self.ship.update()
             self._update_bullets()
@@ -106,6 +119,19 @@ class BirdPlanet:
                 self.stars.remove(star)
                 self.current_star_quantity -= 1
 
+    def _update_rocks(self, stage):
+
+        # print(stage)
+        if stage == 3:
+            pass
+
+        self._build_terrain(stage)
+        self.rocks.update()
+
+        for rock in self.rocks.copy():
+            if rock.rect.right <= 0: # self.screen.get_rect().right:
+                self.rocks.remove(rock)
+
     def _create_star_sky(self):
 
         while self.current_star_quantity < self.star_quantity:
@@ -126,6 +152,22 @@ class BirdPlanet:
     #
     #     if self.star_quantity
 
+    def _build_terrain(self, stage):
+
+        if stage == 1:
+            new_rock = Rock(self)
+            # new_ground_rock.x = self.screen.get_rect().width
+            new_rock.rect.y = randint(- 200, 199) + self.current_ground_level
+            self.current_ground_level = new_rock.rect.y
+            new_rock.rect.height = 100
+            self.rocks.add(new_rock)
+
+
+    # def _star_rebirth(self):
+    #
+    #     if self.star_quantity
+
+
     def _update_screen(self):
 
         self.screen.fill(self.settings.bg_color)
@@ -133,6 +175,9 @@ class BirdPlanet:
 
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
+
+        for rock in self.rocks.sprites():
+            rock.draw_rock()
 
         self.ship.blitme()
 

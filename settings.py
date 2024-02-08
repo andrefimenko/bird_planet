@@ -19,5 +19,17 @@ class Settings:
         self.bullet_color = "white"
         self.gun_fire_rate = 1
 
+        # Planet settings
+        self.planet_speed = 1.6
+
+        # Ground settings
+        self.ground_color = "green"
+
+        self.rock_width = 2
+        self.rock_height = 500
+
+        # Cave ceiling settings
+        self.ceiling_color = "brown"
+
         # Bird settings
         self.bird_speed = 1

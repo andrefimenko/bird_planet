@@ -1,3 +1,5 @@
+from random import randint
+
 import pygame
 from pygame.sprite import Sprite
 
@@ -12,6 +14,4 @@ class Bird(Sprite):
         self.rect = self.image.get_rect()
 
         self.rect.x = self.rect.width
-        self.rect.y = self.rect.height
-
-        self.x = float(self.rect.x)
+        self.rect.y = randint(0, self.screen.get_rect().height)
