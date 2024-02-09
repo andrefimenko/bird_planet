@@ -16,7 +16,7 @@ class Rock(Sprite):
         self.rect = pygame.Rect(
             self.screen.get_rect().width,
             self.screen.get_rect().height,
-            self.settings.rock_width, 1)
+            self.settings.rock_width, 10)
 
         # self.rect.x = self.screen.get_rect().width
         # self.rect.y = self.screen.get_rect().height
@@ -30,7 +30,8 @@ class Rock(Sprite):
 
         self.rect.x = self.x
 
-
-    def draw_rock(self):
-
+    def draw_ground_rock(self):
         pygame.draw.rect(self.screen, self.ground_color, self.rect)
+
+    def draw_ceiling_rock(self):
+        pygame.draw.rect(self.screen, self.ceiling_color, self.rect)
