@@ -27,9 +27,11 @@ class BirdPlanet:
         pygame.display.set_caption("Bird Planet")
 
         self.scenario = Scenario(self)
-        # self.stage = self.scenario.stage
+        self.stage_progress = 0
+        self.rock = Rock(self)
         self.current_ground_level = 0
-        self.current_ceiling_level = 0
+        self.current_ceiling_level = self.settings.screen_height + self.rock.rect.height -5
+        self.current_ceiling_rock_quantity = 0
 
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
@@ -37,8 +39,8 @@ class BirdPlanet:
         self.ground_rocks = pygame.sprite.Group()
         self.ceiling_rocks = pygame.sprite.Group()
 
-        self.star_quantity = (self.screen.get_rect().width *
-                         self.screen.get_rect().height) // 10000
+        self.star_quantity = (self.screen.get_rect().width
+                              * self.screen.get_rect().height) // 10000
         self.current_star_quantity = 0
         self._create_star_sky()
 
@@ -148,7 +150,7 @@ class BirdPlanet:
 
     def _refill_star_sky(self):
 
-        while self.current_star_quantity < self.star_quantity:
+        if self.current_star_quantity < self.star_quantity * (1 - self.stage_progress) and self.scenario.stage == 0:
             new_star = Star(self)
             new_star.x = self.screen.get_rect().width
             self.stars.add(new_star)
@@ -159,30 +161,66 @@ class BirdPlanet:
 
         if stage == 1:
             new_rock = Rock(self)
-            self.current_ground_level += randint(-100, 101) / randint(10, 15)# * randint(-1, 2)
+            if self.current_ground_level < (self.settings.screen_height * 0.05):
+                self.current_ground_level += (randint(
+                    int(self.settings.screen_height * -0.05), int(self.settings.screen_height * 0.06))
+                                              / randint(10, 15))# * randint(-1, 2)
+            elif self.current_ground_level > (self.settings.screen_height * 0.1):
+                self.current_ground_level += (randint(
+                    int(self.settings.screen_height * -0.055), int(self.settings.screen_height * 0.055))
+                                              / randint(10, 15))
+            else:
+                self.current_ground_level += (randint(
+                    int(self.settings.screen_height * -0.06), int(self.settings.screen_height * 0.05))
+                                              / randint(10, 15))
             new_rock.rect.y -= self.current_ground_level
             # new_rock.rect.height = 10
             self.ground_rocks.add(new_rock)
-            # print(self.current_ground_level)
+            print(self.current_ground_level)
+
         elif stage == 2:
-            # print(f"Stage 2 {self.current_ground_level}")
             new_ground_rock = Rock(self)
-            new_ceiling_rock = Rock(self)
-            new_ceiling_rock.rect.y = 0
-            self.current_ground_level += randint(-101, 100) / randint(20, 30)# * randint(-1, 2)
-            self.current_ceiling_level += randint(-100, 101) / randint(20, 30)# * randint(-1, 2)
+
+            if self.current_ground_level < (self.settings.screen_height * 0.7):
+                self.current_ground_level += (randint(
+                    int(self.settings.screen_height * -0.05), int(self.settings.screen_height * 0.065))
+                 / randint(10, 15))
+            else:
+                new_ceiling_rock = Rock(self)
+                self.current_ceiling_level += (randint(
+                    int(self.settings.screen_height * -0.06), int(self.settings.screen_height * 0.05))
+                                              / randint(10, 15))
+                new_ceiling_rock.rect.y -= self.current_ceiling_level
+                self.ceiling_rocks.add(new_ceiling_rock)
+                if self.current_ceiling_rock_quantity <= (self.settings.screen_width / self.settings.rock_width):
+                    self.current_ceiling_rock_quantity += 1
             new_ground_rock.rect.y -= self.current_ground_level
-            new_ceiling_rock.rect.y -= self.current_ceiling_level
+
             self.ground_rocks.add(new_ground_rock)
-            self.ceiling_rocks.add(new_ceiling_rock)
+
+
 
     def _update_screen(self):
 
-        def background_color(sc):
-            self.settings.bg_color = 'white'
-            return self.settings.bg_color
+        if self.scenario.stage == 0:
+            self.stage_progress = ((time.time() - self.scenario.scenario['start_time'])
+                              / self.scenario.scenario['de_orbiting_time'])
+            self.settings.bg_color = (
+                int(120 * self.stage_progress),
+                int(188 * self.stage_progress),
+                int(235 * self.stage_progress))
 
-        self.screen.fill(background_color(self.scenario.scenario))
+        elif self.scenario.stage == 1:
+            self.settings.bg_color = (120, 188, 235)
+
+        elif (self.scenario.stage == 2 and self.current_ceiling_rock_quantity
+              > (self.settings.screen_width / self.settings.rock_width)):
+            self.settings.bg_color = (
+                int(self.settings.bg_color[0] / 1.01),
+                int(self.settings.bg_color[1] / 1.01),
+                int(self.settings.bg_color[2] / 1.01))
+
+        self.screen.fill(self.settings.bg_color)
         self.stars.draw(self.screen)
 
         for bullet in self.bullets.sprites():

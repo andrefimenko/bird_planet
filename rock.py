@@ -16,7 +16,7 @@ class Rock(Sprite):
         self.rect = pygame.Rect(
             self.screen.get_rect().width,
             self.screen.get_rect().height,
-            self.settings.rock_width, 10)
+            self.settings.rock_width, 20)
 
         # self.rect.x = self.screen.get_rect().width
         # self.rect.y = self.screen.get_rect().height
