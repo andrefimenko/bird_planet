@@ -13,10 +13,14 @@ class Rock(Sprite):
         self.ground_color = self.settings.ground_color
         self.ceiling_color = self.settings.ceiling_color
 
-        self.rect = pygame.Rect(0, 0, self.settings.rock_width, 0)
+        self.rect = pygame.Rect(
+            self.screen.get_rect().width,
+            self.screen.get_rect().height,
+            self.settings.rock_width, 1)
 
-        self.rect.x = self.screen.get_rect().width
-        # self.rect.y = 500
+        # self.rect.x = self.screen.get_rect().width
+        # self.rect.y = self.screen.get_rect().height
+        # self.rect.width = self.settings.rock_width
 
         self.x = float(self.rect.x)
 

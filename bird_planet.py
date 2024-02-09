@@ -1,6 +1,6 @@
 import sys
 import time
-from random import randint
+from random import choices, randint
 
 import pygame
 
@@ -28,8 +28,8 @@ class BirdPlanet:
 
         self.scenario = Scenario(self)
         # self.stage = self.scenario.stage
-
-        self.current_ground_level = self.settings.screen_height - 100
+        self.current_ground_level = 0
+        self.current_ceiling_level = 0
 
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
@@ -125,12 +125,14 @@ class BirdPlanet:
         if stage == 3:
             pass
 
-        self._build_terrain(stage)
+        self.build_terrain(stage)
         self.rocks.update()
 
         for rock in self.rocks.copy():
             if rock.rect.right <= 0: # self.screen.get_rect().right:
                 self.rocks.remove(rock)
+
+        # print(len(self.rocks))
 
     def _create_star_sky(self):
 
@@ -152,15 +154,22 @@ class BirdPlanet:
     #
     #     if self.star_quantity
 
-    def _build_terrain(self, stage):
+    def build_terrain(self, stage):
 
         if stage == 1:
             new_rock = Rock(self)
-            # new_ground_rock.x = self.screen.get_rect().width
-            new_rock.rect.y = randint(- 200, 199) + self.current_ground_level
-            self.current_ground_level = new_rock.rect.y
-            new_rock.rect.height = 100
+
+            self.current_ground_level += randint(-100, 101) / randint(20, 30)# * randint(-1, 2)
+
+            new_rock.rect.y -= self.current_ground_level
+            new_rock.rect.height = 10
+
+            # self.current_ground_level = new_rock.rect.y
+            # print(self.current_ground_level)
+
             self.rocks.add(new_rock)
+
+
 
 
     # def _star_rebirth(self):

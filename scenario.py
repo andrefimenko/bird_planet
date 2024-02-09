@@ -13,7 +13,7 @@ class Scenario:
         self.stage = 0
 
         self.start_time = time.time()
-        self.de_orbiting_time = 2 # 120
+        self.de_orbiting_time = 0.1 # 120
         self.above_the_surface_time = 120
         self.in_the_cave_time = 2 # 120
         self.final_battle_hp = 10

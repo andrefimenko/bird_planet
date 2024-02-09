@@ -26,7 +26,6 @@ class Settings:
         self.ground_color = "green"
 
         self.rock_width = 2
-        self.rock_height = 500
 
         # Cave ceiling settings
         self.ceiling_color = "brown"
