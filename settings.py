@@ -31,4 +31,4 @@ class Settings:
         self.stone_color = "red"
 
         # Bird settings
-        self.bird_speed = 1
+        self.bird_speed = 2
