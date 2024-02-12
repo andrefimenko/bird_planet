@@ -8,7 +8,8 @@ from settings import Settings
 from ship import Ship
 from bullet import Bullet
 from star import Star
-from rock import Rock
+from ground import GroundRock
+from ceiling import CeilingRock
 from scenario import Scenario
 
 
@@ -22,15 +23,16 @@ class BirdPlanet:
         self.settings = Settings()
 
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        self.settings.screen_width = self.screen.get_rect().width
-        self.settings.screen_height = self.screen.get_rect().height
+        self.screen_width = self.screen.get_rect().width
+        self.screen_height = self.screen.get_rect().height
         pygame.display.set_caption("Bird Planet")
 
         self.scenario = Scenario(self)
         self.stage_progress = 0
-        self.rock = Rock(self)
+        self.ceiling_rock = CeilingRock(self)
         self.current_ground_level = 0
-        self.current_ceiling_level = self.settings.screen_height + self.rock.rect.height -5
+        # self.ceiling = True
+        self.current_ceiling_level = self.screen.get_height() + self.ceiling_rock.rect.height
         self.current_ceiling_rock_quantity = 0
 
         self.ship = Ship(self)
@@ -118,26 +120,26 @@ class BirdPlanet:
         self.stars.update()
 
         for star in self.stars.copy():
-            if star.rect.right <= 0: # self.screen.get_rect().right:
+            if star.rect.right <= 0:  # self.screen.get_rect().right:
                 self.stars.remove(star)
                 self.current_star_quantity -= 1
 
     def _update_rocks(self, stage):
 
         # print(stage)
-        if stage == 3:
-            pass
+        # if stage == 3:
+        #     pass
 
         self.build_terrain(stage)
         self.ground_rocks.update()
         self.ceiling_rocks.update()
 
-        for rock in self.ground_rocks.copy():
-            if rock.rect.right <= 0: # self.screen.get_rect().right:
-                self.ground_rocks.remove(rock)
-        for rock in self.ceiling_rocks.copy():
-            if rock.rect.right <= 0:
-                self.ceiling_rocks.remove(rock)
+        for g_rock in self.ground_rocks.copy():
+            if g_rock.rect.right <= 0:  # self.screen.get_rect().right:
+                self.ground_rocks.remove(g_rock)
+        for c_rock in self.ceiling_rocks.copy():
+            if c_rock.rect.right <= 0:
+                self.ceiling_rocks.remove(c_rock)
 
         # print(len(self.ground_rocks))
 
@@ -160,43 +162,54 @@ class BirdPlanet:
     def build_terrain(self, stage):
 
         if stage == 1:
-            new_rock = Rock(self)
-            if self.current_ground_level < (self.settings.screen_height * 0.05):
+            new_rock = GroundRock(self)
+            if self.current_ground_level < (self.screen_height * 0.05):
                 self.current_ground_level += (randint(
-                    int(self.settings.screen_height * -0.05), int(self.settings.screen_height * 0.06))
-                                              / randint(10, 15))# * randint(-1, 2)
-            elif self.current_ground_level > (self.settings.screen_height * 0.1):
+                    int(self.screen_height * -0.05), int(self.screen_height * 0.06))
+                                              / randint(10, 15))  # * randint(-1, 2)
+            elif self.current_ground_level > (self.screen_height * 0.1):
                 self.current_ground_level += (randint(
-                    int(self.settings.screen_height * -0.055), int(self.settings.screen_height * 0.055))
+                    int(self.screen_height * -0.055), int(self.screen_height * 0.055))
                                               / randint(10, 15))
             else:
                 self.current_ground_level += (randint(
-                    int(self.settings.screen_height * -0.06), int(self.settings.screen_height * 0.05))
+                    int(self.screen_height * -0.06), int(self.screen_height * 0.05))
                                               / randint(10, 15))
             new_rock.rect.y -= self.current_ground_level
             # new_rock.rect.height = 10
             self.ground_rocks.add(new_rock)
-            print(self.current_ground_level)
+            print(f"Stage 1 ground level {self.current_ground_level}")
 
         elif stage == 2:
-            new_ground_rock = Rock(self)
+            new_rock = GroundRock(self)
 
-            if self.current_ground_level < (self.settings.screen_height * 0.7):
+            if self.current_ground_level <= (self.screen_height * 0.7):
                 self.current_ground_level += (randint(
-                    int(self.settings.screen_height * -0.05), int(self.settings.screen_height * 0.065))
-                 / randint(10, 15))
-            else:
-                new_ceiling_rock = Rock(self)
-                self.current_ceiling_level += (randint(
-                    int(self.settings.screen_height * -0.06), int(self.settings.screen_height * 0.05))
+                    int(self.screen_height * -0.05), int(self.screen_height * 0.065))
                                               / randint(10, 15))
-                new_ceiling_rock.rect.y -= self.current_ceiling_level
-                self.ceiling_rocks.add(new_ceiling_rock)
-                if self.current_ceiling_rock_quantity <= (self.settings.screen_width / self.settings.rock_width):
-                    self.current_ceiling_rock_quantity += 1
-            new_ground_rock.rect.y -= self.current_ground_level
+                new_rock.rect.y -= self.current_ground_level
+            self.ground_rocks.add(new_rock)
+            print(f"Stage 2 ground level {self.current_ground_level}")
 
-            self.ground_rocks.add(new_ground_rock)
+        elif stage == 3:
+            new_ceiling_stone = CeilingRock(self)
+
+            self.current_ceiling_level -= (randint(
+                    int(self.screen_height * -0.05), int(self.screen_height * 0.065))
+                                              / randint(10, 15))
+            new_ceiling_stone.rect.y -= self.current_ceiling_level
+            self.ceiling_rocks.add(new_ceiling_stone)
+
+            new_ground_stone = GroundRock(self)
+
+            self.current_ground_level += (randint(
+                    int(self.screen_height * -0.05), int(self.screen_height * 0.065))
+                                              / randint(10, 15))
+            new_ground_stone.rect.y -= self.current_ground_level
+            self.ground_rocks.add(new_ground_stone)
+
+            print(f"Ceiling {self.current_ceiling_level}")
+            print(f"Ground {self.current_ground_level}")
 
 
 
@@ -204,7 +217,7 @@ class BirdPlanet:
 
         if self.scenario.stage == 0:
             self.stage_progress = ((time.time() - self.scenario.scenario['start_time'])
-                              / self.scenario.scenario['de_orbiting_time'])
+                                   / self.scenario.scenario['de_orbiting_time'])
             self.settings.bg_color = (
                 int(120 * self.stage_progress),
                 int(188 * self.stage_progress),
@@ -214,7 +227,7 @@ class BirdPlanet:
             self.settings.bg_color = (120, 188, 235)
 
         elif (self.scenario.stage == 2 and self.current_ceiling_rock_quantity
-              > (self.settings.screen_width / self.settings.rock_width)):
+              > (self.screen_width / self.settings.rock_width)):
             self.settings.bg_color = (
                 int(self.settings.bg_color[0] / 1.01),
                 int(self.settings.bg_color[1] / 1.01),
@@ -226,17 +239,16 @@ class BirdPlanet:
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
 
-        for rock in self.ground_rocks.sprites():
-            rock.draw_ground_rock()
-        for rock in self.ceiling_rocks.sprites():
-            rock.draw_ceiling_rock()
+        for ground_rock in self.ground_rocks.sprites():
+            ground_rock.draw_ground_rock()
+        for ceiling_rock in self.ceiling_rocks.sprites():
+            ceiling_rock.draw_ceiling_rock()
 
         self.ship.blitme()
 
-
         pygame.display.flip()
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     bp = BirdPlanet()
     bp.run_game()

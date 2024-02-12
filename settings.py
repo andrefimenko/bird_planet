@@ -28,7 +28,7 @@ class Settings:
         self.rock_width = 2
 
         # Cave ceiling settings
-        self.ceiling_color = "brown"
+        self.stone_color = "red"
 
         # Bird settings
         self.bird_speed = 1

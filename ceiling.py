@@ -3,15 +3,15 @@ from random import randint
 import pygame
 from pygame.sprite import Sprite
 
-class Rock(Sprite):
+class CeilingRock(Sprite):
 
     def __init__(self, bp_game):
 
         super().__init__()
         self.screen = bp_game.screen
         self.settings = bp_game.settings
-        self.ground_color = self.settings.ground_color
-        self.ceiling_color = self.settings.ceiling_color
+        self.ceiling_color = self.settings.stone_color
+        # self.stone_color = self.settings.stone_color
 
         self.rect = pygame.Rect(
             self.screen.get_rect().width,
@@ -29,9 +29,6 @@ class Rock(Sprite):
         self.x -= self.settings.planet_speed
 
         self.rect.x = self.x
-
-    def draw_ground_rock(self):
-        pygame.draw.rect(self.screen, self.ground_color, self.rect)
 
     def draw_ceiling_rock(self):
         pygame.draw.rect(self.screen, self.ceiling_color, self.rect)
