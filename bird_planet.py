@@ -11,7 +11,10 @@ from star import Star
 from ground import GroundRock
 from ceiling import CeilingRock
 from scenario import Scenario
+from enemy import Enemy
 from bird import Bird
+from ground_unit import GroundUnit
+from ground_bullet import GroundBullet
 
 
 class BirdPlanet:
@@ -37,11 +40,15 @@ class BirdPlanet:
         self.current_ceiling_rock_quantity = 0
 
         self.ship = Ship(self)
+        self.ground_unit = GroundUnit(self)
         self.bullets = pygame.sprite.Group()
         self.stars = pygame.sprite.Group()
+        self.enemies = pygame.sprite.Group()
         self.ground_rocks = pygame.sprite.Group()
         self.ceiling_rocks = pygame.sprite.Group()
         self.birds = pygame.sprite.Group()
+        self.ground_units = pygame.sprite.Group()
+        self.ground_bullets = pygame.sprite.Group()
 
         self.star_quantity = (self.screen.get_rect().width
                               * self.screen.get_rect().height) // 10000
@@ -51,18 +58,23 @@ class BirdPlanet:
         # self.current_time = current_time.current_time()
         self.last_shot_time = 0
 
+        self.current_enemy_quantity = 0
         self.current_bird_quantity = 0
+        self.current_ground_unit_quantity = 0
 
     def run_game(self):
 
         while True:
             self.scenario.stages(self.current_time)
             self._update_stars()
+            self._update_enemies(self.scenario.stage)
+            self._update_ground_units()
             self._update_birds(self.scenario.stage)
             self._update_rocks(self.scenario.stage)
             self._check_events()
             self.ship.update()
             self._update_bullets()
+            self._update_ground_bullets()
             self._update_screen()
             self.clock.tick(60)
 
@@ -89,6 +101,8 @@ class BirdPlanet:
         elif event.key == pygame.K_q:
             sys.exit()
 
+        # self._fire_ground_bullet()
+
     def _check_keyup_events(self, event):
 
         if event.key == pygame.K_RIGHT:
@@ -108,6 +122,14 @@ class BirdPlanet:
 
             self.last_shot_time = time.time()
 
+    def _fire_ground_bullet(self):
+
+        fire_probability = randint(0, 5)
+        # if True: #fire_probability == 0:
+        new_ground_bullet = GroundBullet(self)
+        self.ground_bullets.add(new_ground_bullet)
+        # print(f"Ground bullets {len(self.ground_bullets)}")
+
     def _update_bullets(self):
 
         self.bullets.update()
@@ -115,6 +137,26 @@ class BirdPlanet:
         for bullet in self.bullets.copy():
             if bullet.rect.left >= self.screen.get_rect().right:
                 self.bullets.remove(bullet)
+
+        collisions_enemies = pygame.sprite.groupcollide(
+            self.bullets, self.enemies, True, True)
+
+        collisions_ground_units = pygame.sprite.groupcollide(
+            self.bullets, self.ground_units, True, True)
+
+        collisions_birds = pygame.sprite.groupcollide(
+            self.bullets, self.birds, True, True)
+
+        pygame.sprite.groupcollide(self.bullets, self.ground_rocks, True, False)
+        pygame.sprite.groupcollide(self.bullets, self.ceiling_rocks, True, False)
+
+    def _update_ground_bullets(self):
+
+        self.ground_bullets.update()
+
+        for ground_bullet in self.ground_bullets.copy():
+            if ground_bullet.rect.left <= 0:
+                self.ground_bullets.remove(ground_bullet)
 
     def _update_stars(self):
 
@@ -128,14 +170,39 @@ class BirdPlanet:
                 self.stars.remove(star)
                 self.current_star_quantity -= 1
 
+    def _update_enemies(self, stage):
+
+        if 0 <= stage <= 2:
+            enemy_probability = randint(0, 400)
+            if enemy_probability == 0:
+                new_enemy = Enemy(self)
+                new_enemy.x = self.screen.get_rect().width
+                new_enemy.rect.y =\
+                    randint(0,
+                            self.screen_height - int(self.current_ground_level) -
+                            self.ground_unit.rect.height * 3)
+                self.enemies.add(new_enemy)
+                self.current_enemy_quantity += 1
+
+        self.enemies.update()
+
+        for enemy in self.enemies.copy():
+            if enemy.rect.right <= 0:
+                self.enemies.remove(enemy)
+
     def _update_birds(self, stage):
 
-        bird_probability = randint(0, 800)
-        if stage == 1 and bird_probability == 100:
-            new_bird = Bird(self)
-            new_bird.x = self.screen.get_rect().width
-            self.birds.add(new_bird)
-            self.current_bird_quantity += 1
+        if stage == 1 or stage == 2:
+            bird_probability = randint(0, 400)
+            if bird_probability == 0:
+                new_bird = Bird(self)
+                new_bird.x = self.screen.get_rect().width
+                new_bird.rect.y =\
+                    randint(0,
+                            self.screen_height - int(self.current_ground_level) -
+                            self.ground_unit.rect.height * 3)
+                self.birds.add(new_bird)
+                self.current_bird_quantity += 1
 
         self.birds.update()
 
@@ -228,6 +295,27 @@ class BirdPlanet:
             new_ground_stone.rect.y -= self.current_ground_level
             self.ground_rocks.add(new_ground_stone)
 
+
+
+    def _update_ground_units(self):
+
+        if self.current_ground_level >= 5:
+            ground_unit_probability = randint(0, 200)
+            if ground_unit_probability == 0:
+                new_ground_unit = GroundUnit(self)
+                new_ground_unit.x = self.screen.get_rect().width
+                new_ground_unit.rect.y -= self.current_ground_level
+                # print(f"Update ground unit. Current ground level: {self.current_ground_level}")
+                self.ground_units.add(new_ground_unit)
+                # self.current_ground_unit_quantity += 1
+
+        self._fire_ground_bullet()
+        self.ground_units.update()
+
+        for unit in self.ground_units.copy():
+            if unit.rect.right <= 0:
+                self.ground_units.remove(unit)
+
     def _update_screen(self):
 
         if self.scenario.stage == 0:
@@ -250,10 +338,15 @@ class BirdPlanet:
 
         self.screen.fill(self.settings.bg_color)
         self.stars.draw(self.screen)
+        self.enemies.draw(self.screen)
         self.birds.draw(self.screen)
+        self.ground_units.draw(self.screen)
 
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
+
+        for ground_bullet in self.ground_bullets.sprites():
+            ground_bullet.draw_ground_bullet()
 
         for ground_rock in self.ground_rocks.sprites():
             ground_rock.draw_ground_rock()
@@ -261,6 +354,7 @@ class BirdPlanet:
             ceiling_rock.draw_ceiling_rock()
 
         self.ship.blitme()
+        # self.ground_unit.blitme()
 
         pygame.display.flip()
 
