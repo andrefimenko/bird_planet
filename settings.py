@@ -9,7 +9,8 @@ class Settings:
         self.star_speed = 0.8
 
         # Enemy settings
-        self.enemy_speed = 2
+        self.enemy_hor_speed = 2
+        self.enemy_vert_speed = 2
 
         # Ship settings
         self.ship_vert_speed = 1.5
@@ -35,7 +36,7 @@ class Settings:
         # Ground settings
         self.ground_color = "green"
 
-        self.rock_width = 2
+        self.rock_width = 4
 
         # Cave ceiling settings
         self.stone_color = "red"

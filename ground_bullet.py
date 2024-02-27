@@ -10,17 +10,17 @@ class GroundBullet(Sprite):
         self.settings = bp_game.settings
         self.color = 'black'
 
-        self.rect = pygame.Rect(0, 0, self.settings.ground_bullet_width,
+        self.rect = pygame.Rect(100, 100, self.settings.ground_bullet_width,
                                 self.settings.ground_bullet_height)
-        self.rect.midbottom = bp_game.ground_unit.rect.midtop
+        # self.rect.midbottom = bp_game.ground_unit.rect.midtop
 
         self.x = float(self.rect.x)
         self.y = float(self.rect.y)
 
     def update(self):
 
-        self.x += 1 # self.settings.ground_bullet_hor_speed
-        self.y += 1 # self.settings.ground_bullet_vert_speed
+        self.x -= self.settings.ground_bullet_hor_speed
+        self.y -= self.settings.ground_bullet_vert_speed
 
         self.rect.x = self.x
         self.rect.y = self.y

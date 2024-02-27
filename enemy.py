@@ -21,5 +21,5 @@ class Enemy(Sprite):
 
     def update(self):
 
-        self.x -= self.settings.enemy_speed
+        self.x -= self.settings.enemy_hor_speed
         self.rect.x = self.x

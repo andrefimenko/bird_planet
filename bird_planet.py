@@ -1,6 +1,6 @@
 import sys
 import time
-from random import choices, randint
+from random import randint
 
 import pygame
 
@@ -138,14 +138,26 @@ class BirdPlanet:
             if bullet.rect.left >= self.screen.get_rect().right:
                 self.bullets.remove(bullet)
 
-        collisions_enemies = pygame.sprite.groupcollide(
+        self._check_bullet_enemy_collisions()
+        self._check_bullet_ground_unit_collisions()
+        self._check_bullet_bird_collisions()
+        # self._check_ship_enemy_collisions()
+
+    def _check_bullet_enemy_collisions(self):
+        collisions_bullet_enemy = pygame.sprite.groupcollide(
             self.bullets, self.enemies, True, True)
 
-        collisions_ground_units = pygame.sprite.groupcollide(
+    def _check_bullet_ground_unit_collisions(self):
+        collisions_bullet_ground_unit = pygame.sprite.groupcollide(
             self.bullets, self.ground_units, True, True)
 
-        collisions_birds = pygame.sprite.groupcollide(
+    def _check_bullet_bird_collisions(self):
+        collisions_bullet_bird = pygame.sprite.groupcollide(
             self.bullets, self.birds, True, True)
+
+    # def _check_ship_enemy_collisions(self):
+    #     collisions_ship_enemy = pygame.sprite.groupcollide(
+    #         self.ship, self.enemies, True, True)
 
         pygame.sprite.groupcollide(self.bullets, self.ground_rocks, True, False)
         pygame.sprite.groupcollide(self.bullets, self.ceiling_rocks, True, False)

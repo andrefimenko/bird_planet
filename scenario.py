@@ -15,7 +15,7 @@ class Scenario:
         self.start_time = time.time()
         self.scenario = {
             "start_time": self.start_time,
-            "de_orbiting_time": 20, #120,
+            "de_orbiting_time": 2, #120,
             "above_the_surface_time": 20, # 120,
             "climbing_time": 15,
             "in_the_cave_time": 120,
