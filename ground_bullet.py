@@ -8,9 +8,11 @@ class GroundBullet(Sprite):
         super().__init__()
         self.screen = bp_game.screen
         self.settings = bp_game.settings
-        self.color = 'black'
+        self.color = 'white'
 
-        self.rect = pygame.Rect(100, 100, self.settings.ground_bullet_width,
+        self.rect = pygame.Rect(bp_game.ground_unit.rect.x,
+                                bp_game.ground_unit.rect.y
+                                , self.settings.ground_bullet_width,
                                 self.settings.ground_bullet_height)
         # self.rect.midbottom = bp_game.ground_unit.rect.midtop
 

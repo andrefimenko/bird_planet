@@ -15,6 +15,7 @@ class GroundUnit(Sprite):
 
         self.image = pygame.image.load('images/ground_unit.png')
         self.rect = self.image.get_rect()
+        self.height = self.rect.height
 
         self.rect.x = self.screen.get_rect().width
         self.rect.y = self.screen.get_rect().height - self.rect.height * 0.75

@@ -1,10 +1,12 @@
 import sys
 import time
+from time import sleep
 from random import randint
 
 import pygame
 
 from settings import Settings
+from game_stats import GameStats
 from ship import Ship
 from bullet import Bullet
 from star import Star
@@ -31,12 +33,15 @@ class BirdPlanet:
         self.screen_height = self.screen.get_rect().height
         pygame.display.set_caption("Bird Planet")
 
+        self.stats = GameStats(self)
+
         self.scenario = Scenario(self)
         self.stage_progress = 0
         self.ceiling_rock = CeilingRock(self)
         self.current_ground_level = 0
+        self.current_ceiling_level = 788
         # self.ceiling = True
-        self.current_ceiling_level = self.screen.get_height() + self.ceiling_rock.rect.height
+        # self.current_ceiling_level = self.screen.get_height() + self.ceiling_rock.rect.height
         self.current_ceiling_rock_quantity = 0
 
         self.ship = Ship(self)
@@ -62,19 +67,25 @@ class BirdPlanet:
         self.current_bird_quantity = 0
         self.current_ground_unit_quantity = 0
 
+        self.game_active = True
+
     def run_game(self):
 
         while True:
             self.scenario.stages(self.current_time)
             self._update_stars()
-            self._update_enemies(self.scenario.stage)
-            self._update_ground_units()
-            self._update_birds(self.scenario.stage)
-            self._update_rocks(self.scenario.stage)
             self._check_events()
-            self.ship.update()
-            self._update_bullets()
-            self._update_ground_bullets()
+
+            if self.game_active:
+                self._update_enemies(self.scenario.stage)
+                self._update_ground_units()
+                self._update_birds(self.scenario.stage)
+                self._update_rocks(self.scenario.stage)
+                self.ship.update()
+                self._update_bullets()
+                self._update_ground_bullets()
+
+            print(self.settings.enemy_vert_direction)
             self._update_screen()
             self.clock.tick(60)
 
@@ -114,6 +125,30 @@ class BirdPlanet:
         elif event.key == pygame.K_DOWN:
             self.ship.moving_down = False
 
+    def _ship_hit(self):
+
+        if self.stats.ships_left > 0:
+            self.stats.ships_left -= 1
+
+            self.bullets.empty()
+            self.enemies.empty()
+            self.ground_rocks.empty()
+            self.ceiling_rocks.empty()
+            self.birds.empty()
+            self.stars.empty()
+            self.ground_units.empty()
+            self.current_ground_level = 0
+            self.current_ceiling_level = self.screen_height
+            self.current_star_quantity = 0
+            self._create_star_sky()
+            self.settings.bg_color = (0, 0, 0)
+            self.stage_progress = 0
+
+            sleep(0.5)
+
+        else:
+            self.game_active = False
+
     def _fire_bullet(self):
 
         if time.time() - self.last_shot_time > self.settings.gun_fire_rate:
@@ -124,10 +159,11 @@ class BirdPlanet:
 
     def _fire_ground_bullet(self):
 
-        fire_probability = randint(0, 5)
-        # if True: #fire_probability == 0:
-        new_ground_bullet = GroundBullet(self)
-        self.ground_bullets.add(new_ground_bullet)
+        fire_probability = randint(0, 50)
+        if fire_probability == 0:
+            new_ground_bullet = GroundBullet(self)
+            new_ground_bullet.rect.x = 400
+            self.ground_bullets.add(new_ground_bullet)
         # print(f"Ground bullets {len(self.ground_bullets)}")
 
     def _update_bullets(self):
@@ -182,13 +218,28 @@ class BirdPlanet:
                 self.stars.remove(star)
                 self.current_star_quantity -= 1
 
+    def _check_enemies_edges(self):
+
+        for enemy in self.enemies.sprites():
+            if enemy.check_edges():
+                self._change_enemies_direction()
+                break
+
+    def _change_enemies_direction(self):
+
+        for enemy in self.enemies.sprites():
+            enemy.rect.y += self.settings.enemy_vert_speed
+        self.settings.enemy_vert_direction *= -1
+
     def _update_enemies(self, stage):
 
-        if 0 <= stage <= 2:
+        if 0 <= stage <= 3:
+            self._check_enemies_edges()
             enemy_probability = randint(0, 400)
             if enemy_probability == 0:
                 new_enemy = Enemy(self)
                 new_enemy.x = self.screen.get_rect().width
+                new_enemy.y = randint(100, 200)
                 new_enemy.rect.y =\
                     randint(0,
                             self.screen_height - int(self.current_ground_level) -
@@ -197,6 +248,9 @@ class BirdPlanet:
                 self.current_enemy_quantity += 1
 
         self.enemies.update()
+
+        if pygame.sprite.spritecollideany(self.ship, self.enemies):
+            self._ship_hit()
 
         for enemy in self.enemies.copy():
             if enemy.rect.right <= 0:
@@ -218,6 +272,9 @@ class BirdPlanet:
 
         self.birds.update()
 
+        if pygame.sprite.spritecollideany(self.ship, self.birds):
+            self._ship_hit()
+
         for bird in self.birds.copy():
             if bird.rect.right <= 0:
                 self.birds.remove(bird)
@@ -227,6 +284,8 @@ class BirdPlanet:
         self.build_terrain(stage)
         self.ground_rocks.update()
         self.ceiling_rocks.update()
+        if pygame.sprite.spritecollideany(self.ship, self.ground_rocks):
+            self._ship_hit()
 
         for g_rock in self.ground_rocks.copy():
             if g_rock.rect.right <= 0:  # self.screen.get_rect().right:
@@ -244,12 +303,12 @@ class BirdPlanet:
 
     def _refill_star_sky(self):
 
-        if self.current_star_quantity < self.star_quantity * (1 - self.stage_progress) and self.scenario.stage == 0:
+        if self.current_star_quantity < self.star_quantity and self.scenario.stage <= 1:
             new_star = Star(self)
             new_star.x = self.screen.get_rect().width
             self.stars.add(new_star)
             self.current_star_quantity += 1
-
+            print("REfil")
     def build_terrain(self, stage):
 
         if stage == 1:
@@ -333,13 +392,13 @@ class BirdPlanet:
         if self.scenario.stage == 0:
             self.stage_progress = ((time.time() - self.scenario.scenario['start_time'])
                                    / self.scenario.scenario['de_orbiting_time'])
-            self.settings.bg_color = (
-                int(120 * self.stage_progress),
-                int(188 * self.stage_progress),
-                int(235 * self.stage_progress))
+            self.settings.bg_color = 'black' # (
+                # int(120 * self.stage_progress),
+                # int(188 * self.stage_progress),
+                # int(235 * self.stage_progress))
 
         elif self.scenario.stage == 1:
-            self.settings.bg_color = (120, 188, 235)
+            self.settings.bg_color = 'black' # '(120, 188, 235)
 
         elif (self.scenario.stage == 2 and self.current_ceiling_rock_quantity
               > (self.screen_width / self.settings.rock_width)):

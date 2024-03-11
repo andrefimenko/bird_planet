@@ -11,10 +11,12 @@ class Settings:
         # Enemy settings
         self.enemy_hor_speed = 2
         self.enemy_vert_speed = 2
+        self.enemy_vert_direction = 1
 
         # Ship settings
         self.ship_vert_speed = 1.5
         self.ship_hor_speed = 3
+        self.ship_limit = 3
 
         # Planet settings
         self.planet_speed = 1.6
